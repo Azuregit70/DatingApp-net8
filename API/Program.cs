@@ -1,5 +1,8 @@
 using API.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +17,24 @@ builder.Services.AddDbContext<DataContext>(opt =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Enable CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:4200") // Allow the frontend on localhost:4200
+                   .AllowAnyMethod()    // Allow any HTTP method (GET, POST, etc.)
+                   .AllowAnyHeader();   // Allow any headers
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+//app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200/", "https://localhost:4200/"));
+
+app.UseCors("AllowLocalhost");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
